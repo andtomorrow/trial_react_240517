@@ -1,6 +1,7 @@
-import { createContext, useEffect, useReducer, useRef, useState } from "react"
+import { createContext, useEffect, useReducer } from "react"
 import "./styles.css"
 import { TodoItem } from "./TodoItem"
+import { NewTodoForm } from "./NewTodoForm"
 
 const LOCAL_STORAGE_KEY = "todos"
 const ACTIONS = {
@@ -35,18 +36,12 @@ function App() {
     return JSON.parse(value)
   })
 
-  const nameRef = useRef()
-
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
 
   function addNewTodo(name) {
-    if (name === "") return
-
     dispatch({ type: ACTIONS.ADD, payload: { name } })
-
-    name = ""
   }
 
   function toggleTodo(todoId, completed) {
@@ -68,15 +63,11 @@ function App() {
     >
       <ul id="list">
         {todos.map((todo) => {
-          return <TodoItem key={todo.id} {...todo} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
+          return <TodoItem key={todo.id} {...todo} />
         })}
       </ul>
 
-      <div id="new-todo-form">
-        <label htmlFor="todo-input">New Todo</label>
-        <input type="text" id="todo-input" ref={nameRef} />
-        <button onClick={() => addNewTodo(nameRef.current.value)}>Add Todo</button>
-      </div>
+      <NewTodoForm />
     </TodoContext.Provider>
   )
 }
