@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState } from "react"
+import { createContext, useEffect, useReducer, useRef, useState } from "react"
 import "./styles.css"
 import { TodoItem } from "./TodoItem"
 
@@ -9,6 +9,24 @@ const ACTIONS = {
   TOGGLE: "TOGGLE",
   DELETE: "DELETE",
 }
+
+function reducer(todos, { type, payload }) {
+  switch (type) {
+    case ACTIONS.ADD:
+      return [...todos, { name: payload.name, completed: false, id: crypto.randomUUID() }]
+    case ACTIONS.TOGGLE:
+      return todos.map((todo) => {
+        if (todo.id === payload.id) return { ...todo, completed: payload.completed }
+        return todo
+      })
+    case ACTIONS.DELETE:
+      return todos.filter((todo) => todo.id !== payload.id)
+    default:
+      return null
+  }
+}
+
+export const TodoContext = createContext()
 
 function App() {
   const [todos, dispatch] = useReducer(reducer, [], (initialValue) => {
@@ -22,22 +40,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos))
   }, [todos])
-
-  function reducer(todos, { type, payload }) {
-    switch (type) {
-      case ACTIONS.ADD:
-        return [...todos, { name: payload.name, completed: false, id: crypto.randomUUID() }]
-      case ACTIONS.TOGGLE:
-        return todos.map((todo) => {
-          if (todo.id === payload.id) return { ...todo, completed: payload.completed }
-          return todo
-        })
-      case ACTIONS.DELETE:
-        return todos.filter((todo) => todo.id !== payload.id)
-      default:
-        return null
-    }
-  }
 
   function addNewTodo(name) {
     if (name === "") return
@@ -56,7 +58,14 @@ function App() {
   }
 
   return (
-    <>
+    <TodoContext.Provider
+      value={{
+        todos,
+        addNewTodo,
+        toggleTodo,
+        deleteTodo,
+      }}
+    >
       <ul id="list">
         {todos.map((todo) => {
           return <TodoItem key={todo.id} {...todo} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
@@ -68,7 +77,7 @@ function App() {
         <input type="text" id="todo-input" ref={nameRef} />
         <button onClick={() => addNewTodo(nameRef.current.value)}>Add Todo</button>
       </div>
-    </>
+    </TodoContext.Provider>
   )
 }
 
