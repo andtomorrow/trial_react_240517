@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from "react"
+import { createContext, useEffect, useReducer, useState } from "react"
 import "./styles.css"
 import { TodoItem } from "./TodoItem"
 import { NewTodoForm } from "./NewTodoForm"
@@ -31,10 +31,17 @@ function reducer(todos, { type, payload }) {
 export const TodoContext = createContext()
 
 function App() {
+  const [searchTodoKeyword, setSearchTodoKeyword] = useState("")
+  const [hideCompletedFilter, setHideCompletedFilter] = useState(false)
   const [todos, dispatch] = useReducer(reducer, [], (initialValue) => {
     const value = localStorage.getItem(LOCAL_STORAGE_KEY)
     if (value == null) return initialValue
     return JSON.parse(value)
+  })
+
+  const filteredTodos = todos.filter((todo) => {
+    if (hideCompletedFilter && todo.completed) return false
+    return todo.name.includes(searchTodoKeyword)
   })
 
   useEffect(() => {
@@ -56,15 +63,15 @@ function App() {
   return (
     <TodoContext.Provider
       value={{
-        todos,
+        todos: filteredTodos,
         addNewTodo,
         toggleTodo,
         deleteTodo,
       }}
     >
-      <FilterForm />
+      <FilterForm keyword={searchTodoKeyword} setKeyword={setSearchTodoKeyword} hideCompletedFilter={hideCompletedFilter} setHideCompletedFilter={setHideCompletedFilter} />
       <ul id="list">
-        {todos.map((todo) => {
+        {filteredTodos.map((todo) => {
           return <TodoItem key={todo.id} {...todo} />
         })}
       </ul>
