@@ -2,6 +2,7 @@ import { createContext, useEffect, useReducer } from "react"
 import "./styles.css"
 import { TodoItem } from "./TodoItem"
 import { NewTodoForm } from "./NewTodoForm"
+import { FilterForm } from "./FilterForm"
 
 const LOCAL_STORAGE_KEY = "todos"
 const ACTIONS = {
@@ -61,6 +62,7 @@ function App() {
         deleteTodo,
       }}
     >
+      <FilterForm />
       <ul id="list">
         {todos.map((todo) => {
           return <TodoItem key={todo.id} {...todo} />
