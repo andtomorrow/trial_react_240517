@@ -14,7 +14,6 @@ function App() {
   const [todos, dispatch] = useReducer(reducer, [], (initialValue) => {
     const value = localStorage.getItem(LOCAL_STORAGE_KEY)
     if (value == null) return initialValue
-
     return JSON.parse(value)
   })
 
@@ -28,6 +27,13 @@ function App() {
     switch (type) {
       case ACTIONS.ADD:
         return [...todos, { name: payload.name, completed: false, id: crypto.randomUUID() }]
+      case ACTIONS.TOGGLE:
+        return todos.map((todo) => {
+          if (todo.id === payload.id) return { ...todo, completed: payload.completed }
+          return todo
+        })
+      case ACTIONS.DELETE:
+        return todos.filter((todo) => todo.id !== payload.id)
       default:
         return null
     }
@@ -41,27 +47,19 @@ function App() {
     name = ""
   }
 
-  // function toggleTodo(todoId, completed) {
-  //   setTodos((currentTodos) => {
-  //     return currentTodos.map((todo) => {
-  //       if (todo.id === todoId) return { ...todo, completed }
+  function toggleTodo(todoId, completed) {
+    dispatch({ type: ACTIONS.TOGGLE, payload: { id: todoId, completed } })
+  }
 
-  //       return todo
-  //     })
-  //   })
-  // }
-
-  // function deleteTodo(todoId) {
-  //   setTodos((currentTodos) => {
-  //     return currentTodos.filter((todo) => todo.id !== todoId)
-  //   })
-  // }
+  function deleteTodo(todoId) {
+    dispatch({ type: ACTIONS.DELETE, payload: { id: todoId } })
+  }
 
   return (
     <>
       <ul id="list">
         {todos.map((todo) => {
-          return <TodoItem key={todo.id} {...todo} toggleTodo={() => null} deleteTodo={() => null} />
+          return <TodoItem key={todo.id} {...todo} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
         })}
       </ul>
 
